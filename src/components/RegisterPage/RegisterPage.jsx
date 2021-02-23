@@ -24,17 +24,24 @@ export default function RegisterPage() {
 
     const { register, watch, errors, handleSubmit } = useForm()
     const [errorFromSubmit, setErrorFromSubmit] = useState("")
+    const [loading, setLoading] = useState(false)
     const password = useRef()
     password.current = watch('password')
 
     const onSubmit = async (data) => {
-
         try {
+            setLoading(true)
             let createdUser = await firebase
                 .auth()
                 .createUserWithEmailAndPassword(data.email, data.password)
             console.log(createdUser)
+
+            await createdUser.updateProfile({
+
+            })
+            setLoading(false)
         } catch (error) {
+            setLoading(false)
             setErrorFromSubmit(error.message)
             setTimeout(() => {
                 setErrorFromSubmit("")
@@ -95,6 +102,7 @@ export default function RegisterPage() {
                 <input
                     style={{ backgroundColor: '#7173E4' }}
                     type="submit"
+                    disabled={loading}
                 />
 
                 <Link style={{ color: 'gray', textDecoration: 'none' }} to="login">이미 아이디가 있다면...</Link>
