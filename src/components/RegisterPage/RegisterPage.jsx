@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useForm } from 'react-hook-form'
 import firebase from '../../firebase'
+import md5 from 'md5'
 
 const Section = styled.div`
     margin-top: 10em;
@@ -34,10 +35,18 @@ export default function RegisterPage() {
             let createdUser = await firebase
                 .auth()
                 .createUserWithEmailAndPassword(data.email, data.password)
+
+            await createdUser.user.updateProfile({
+                displayName: data.name,
+                //이런 식으로 하면 랜덤한 아바타가 주어진다.
+                photoURL: `http://gravatar.com/avatar/${md5(createdUser.user.email)}?d=identicon`
+            })
             console.log(createdUser)
 
-            await createdUser.updateProfile({
-
+            //Firebase 데이터베이스에 저장하기
+            await firebase.database().ref('user').child(createdUser.user.uid).set({
+                name: createdUser.user.displayName,
+                image: createdUser.user.photoURL,
             })
             setLoading(false)
         } catch (error) {
